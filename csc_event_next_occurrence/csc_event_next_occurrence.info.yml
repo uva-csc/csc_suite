@@ -1,0 +1,7 @@
+name: 'CSC Event Next Occurrence'
+type: module
+description: 'Automatically populates the next and last occurrence timestamps for events.'
+core_version_requirement: ^10 || ^11
+package: CSC
+dependencies:
+  - smart_date

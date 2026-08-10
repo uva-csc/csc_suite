@@ -1,0 +1,13 @@
+/**
+ * Prevent the field_content_blocks (Paragraphs) tabledrag widget from
+ * overflowing into the node edit form's sidebar in Claro.
+ */
+.field--widget-paragraphs {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.field--widget-paragraphs table {
+  table-layout: fixed;
+}

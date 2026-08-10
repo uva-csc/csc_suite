@@ -1,0 +1,5 @@
+name: 'CSC Suite'
+type: module
+description: 'Umbrella module bundling the CSC site''s custom submodules (csc_general, csc_event_next_occurrence, csc_views, csc_site_blocks, csc_social_feeds, csc_admin). No functionality of its own.'
+package: CSC
+core_version_requirement: ^10 || ^11

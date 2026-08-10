@@ -1,0 +1,4 @@
+services:
+  csc_social_feeds.logger:
+    class: Drupal\Core\Logger\LoggerChannelFactory
+    arguments: ['csc_social_feeds']

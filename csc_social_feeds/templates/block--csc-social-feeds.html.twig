@@ -1,0 +1,23 @@
+{# block--csc-social-feeds.html.twig #}
+{%
+  set classes = [
+  'block',
+  'block-' ~ configuration.provider|clean_class,
+  'block-' ~ plugin_id|clean_class,
+  'csc-social-feed-block'
+]
+%}
+<div{{ attributes.addClass(classes) }}>
+  {{ title_prefix }}
+  {{ title_suffix }}
+
+  <div class="content">
+    {% if configuration.feed_type == 'facebook' %}
+      <div class="fb-page" aria-label="CSC's Facebook Feed" data-href="https://www.facebook.com/uvacsc" data-tabs="timeline" data-width="" data-height="" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true"><blockquote cite="https://www.facebook.com/uvacsc" class="fb-xfbml-parse-ignore"><a href="https://www.facebook.com/uvacsc">Contemplative Sciences Center</a></blockquote></div>
+    {% elseif configuration.feed_type == 'instagram' %}
+      <div class="instagram-feed"><a href="https://www.instagram.com/uvacsc" aria-label="CSC's Instagram Feed" target="_blank"><img src="/themes/custom/csc_bs_sass/images/other/csc-instagram-feed.png" height="475" /></a></div>
+    {% else %}
+      <div class="no-feed">The feed for {{ configuration.feed_type }} has not yet been set up.</div>
+    {% endif %}
+  </div>
+</div>

@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * A general Drupal 10 module for the CSC main site for miscellaneous hooks, etc. for customization
+ */
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Access\AccessResult;
+use Drupal\node\NodeInterface;
+
+function csc_general_preprocess_page(&$variables) {
+  // Redirect taxonomy term pages to homepage
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if ($route_name === 'entity.taxonomy_term.canonical') {
+    // Redirect to homepage
+    $response = new \Symfony\Component\HttpFoundation\RedirectResponse('/');
+    $response->send();
+    exit;
+  }
+}
+
+/* Redirect urls for Slide Images to home page (Slide images are only used in views) */
+/**
+ * Implements hook_node_access().
+ */
+function csc_general_node_access(NodeInterface $node, $op, AccountInterface $account) {
+  if ($node->bundle() === 'slide_image' && $op === 'view') {
+    if ($account->hasPermission('administer nodes')) {
+      return AccessResult::neutral()
+        ->addCacheableDependency($node)
+        ->cachePerUser();
+    }
+    /*
+    return AccessResult::forbidden()
+      ->addCacheableDependency($node)
+      ->cachePerUser();*/
+  }
+  return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_view().
+ */
+function csc_general_node_view(array &$build, $entity, $display, $view_mode) {
+  if ($entity->bundle() === 'slide_image' && $view_mode === 'full') {
+    $account = \Drupal::currentUser();
+    if ($account->hasPermission('administer nodes')) {
+      return;
+    }
+    $response = new \Symfony\Component\HttpFoundation\RedirectResponse('/');
+    $response->send();
+    exit();
+  }
+}
+
+/*
+function csc_log_gen($msg='no message sent to log function', $ltype='notice', $sufx='') {
+  if (strlen($sufx) > 0) { $sufx = " $sufx"; }
+  if ($ltype == 'warning') {
+    Drupal::logger("csc_bs_sass$sufx")->warning($msg);
+  } elseif ($ltype == 'error') {
+    Drupal::logger("csc_bs_sass$sufx")->error($msg);
+  } else {
+    Drupal::logger("csc_bs_sass$sufx")->notice($msg);
+  }
+}
+ */

@@ -1,0 +1,5 @@
+name: 'CSC Custom blocks'
+type: module
+description: 'Creates custom blocks for CSC site'
+core_version_requirement: ^10 || ^11
+package: CSC

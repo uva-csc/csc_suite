@@ -1,0 +1,157 @@
+<?php
+
+use Drupal\views\ViewExecutable;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
+function csc_views_views_pre_view(ViewExecutable $view, $display_id, array &$args) {
+  $vid = $view->id();
+  $cdis = $view->current_display;
+  // Don't let day or month calendar views go on forever, only 4 months respectively
+  $day_limit = 120;
+  if ($vid === 'calendar' && $cdis === 'page_day') {
+    $date_string = $args[0];
+    $target = new \DateTime($date_string);
+    $now = new \DateTime();
+    $diff = $now->diff($target);
+    // This date more than $day_limit days in past or future.
+    if ($diff->days > $day_limit) {
+      // Redirect to the calendar view.
+      $url = \Drupal\Core\Url::fromUserInput('/calendar')->toString();
+
+      // Create redirect response
+      $response = new RedirectResponse($url);
+
+      // Send redirect immediately
+      $response->send();
+
+      // Stop further execution
+      exit();
+    }
+  } elseif ($vid === 'calendar' && $cdis === 'page_month') {
+    $request = \Drupal::request(); // Returns Symfony Request object
+
+    // Get a specific URL parameter, e.g., ?foo=bar
+    $current_month = $request->query->get('calendar_timestamp');
+    if ($current_month) {
+
+      $now_ts = time();
+      $ninety_days_seconds = $day_limit * 24 * 60 * 60; // $day_limit days in seconds
+
+      if (abs($current_month - $now_ts) >= $ninety_days_seconds) {
+        // csc_log_me2('Calendary month args: ' . $current_month);
+        // Redirect to the calendar view.
+        $url = \Drupal\Core\Url::fromUserInput('/calendar')->toString();
+
+        // Create redirect response
+        $response = new RedirectResponse($url);
+
+        // Send redirect immediately
+        $response->send();
+
+        // Stop further execution
+        exit();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function csc_views_views_pre_render(ViewExecutable $view) {
+  // Target the specific view and display.
+  $vid = $view->id();
+  $cdis = $view->current_display;
+  if ($vid === 'events' && $cdis === 'block_2') {
+    prioritizePathEvents($view);
+  }
+}
+
+function prioritizePathEvents(ViewExecutable $view) {
+  $view->element['#cache']['contexts'][] = 'url.path';
+  // 1. Get the first segment of the current path.
+  $current_path = \Drupal::service('path.current')->getPath();
+  $alias = \Drupal::service('path_alias.manager')->getAliasByPath($current_path);
+  $segments = explode('/', trim($alias, '/'));
+  $first_segment = $segments[0] ?? NULL;
+  //csc_log_me2("First segment: $first_segment");
+  if ($first_segment) {
+    // csc_log_me2("Slug in query alter: $first_segment");
+    // 2. Map the segment to a taxonomy term ID.
+    // Replace 'tags' with your vocabulary machine name.
+    // Replace 'field_slug' with the field storing the term slug (URL-friendly name).
+    $terms = \Drupal::entityTypeManager()
+      ->getStorage('taxonomy_term')
+      ->loadByProperties([
+        'vid' => 'content_filters',
+        'name' => ucfirst($first_segment),
+      ]);
+
+    if ($terms) {
+      $term = reset($terms);
+      $term_id = $term->id();
+      // csc_log_me2("It is term $term_id");
+
+      if (is_numeric($term_id)) {
+        $all_rows = $view->result;
+
+        // Separate featured items and others
+        $featured = [];
+        $fnids = [];
+        $others = [];
+        $onids = [];
+
+        foreach ($all_rows as $row) {
+          // $row->_entity is the node entity
+          /** @var \Drupal\node\NodeInterface $node */
+          $node = $row->_entity;
+
+          $nid = $node->id();
+          $title = $node->getTitle();
+
+          $term_ids = $node->get('field_filter')->getValue();
+
+          $tids = array_column($term_ids, 'target_id');
+
+          if (in_array($term_id, $tids)) {
+            $featured[] = $row;
+            $fnids[] = "$title ($nid)";
+          }
+          else {
+            $others[] = $row;
+            $onids[] = "$title ($nid)";
+          }
+        }
+
+        /*
+        $ftct = count($featured);
+        $otct = count($others);
+        $nids = implode(", ", $fnids);
+        $onids = implode(", ", $onids);
+
+        csc_log_me2("Term: $first_segment ($term_id), Featured: $ftct ($nids), Others: $otct ($onids)");
+        */
+
+        // Combine featured first, then others
+        $view->result = array_merge($featured, $others);
+
+      }
+    }
+  }
+
+  // Only keep the first 8 items
+  $view->result = array_slice($view->result, 0, 8);
+}
+
+/*
+function csc_log_me2($msg='no message sent to log function', $ltype='notice', $sufx='') {
+  if (strlen($sufx) > 0) { $sufx = " $sufx"; }
+  if ($ltype == 'warning') {
+    Drupal::logger("csc_bs_sass$sufx")->warning($msg);
+  } elseif ($ltype == 'error') {
+    Drupal::logger("csc_bs_sass$sufx")->error($msg);
+  } else {
+    Drupal::logger("csc_bs_sass$sufx")->notice($msg);
+  }
+}
+ */

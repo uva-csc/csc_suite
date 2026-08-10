@@ -1,0 +1,147 @@
+<?php
+
+use Drupal\node\Entity\Node;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Module for automatically calculating the next and last occurrences of events
+ * Fills the fields `field_next_occurrence` and `field_end_date` automatically
+ * For filtering and sorting events by date properly
+ */
+
+/**
+ * Implements hook_form_alter().
+ */
+function csc_event_next_occurrence_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+
+  if ($form_id === 'node_event_form') {
+    $form['field_end_date'] = [
+      '#type' => 'markup',
+      '#markup' => '<div class="form-item"><h4 class="form-item__label">End Date</h4><p>This field will be automatically calculated upon saving.</p></div>',
+      '#weight' => $form['field_end_date']['#weight'] ?? 0,
+    ];
+    $form['field_next_occurrence'] = [
+      '#type' => 'markup',
+      '#markup' => '<div class="form-item"><h4 class="form-item__label">Next Occurrence</h4><p>This field will be automatically calculated upon saving.</p></div>',
+      '#weight' => $form['field_end_date']['#weight'] ?? 0,
+    ];
+  }
+
+  // Target the node edit form for "event" content type
+  if ($form_id === 'node_event_edit_form') {
+
+    $node = $form_state->getFormObject()->getEntity();
+
+    if ($node->hasField('field_end_date')) {
+      // Show the End date value in the field and make it read only
+      $end_date_value = $node->get('field_end_date')->value;
+
+      // Convert to DrupalDateTime — required for datetime widgets.
+      $date_object = new DrupalDateTime($end_date_value);
+
+      // Set as the widget's default value.
+      $form['field_end_date']['widget'][0]['value']['#attributes']['readonly'] = 'readonly';
+      $form['field_end_date']['widget'][0]['value']['#default_value'] = $date_object;
+    }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for event node edit form.
+ */
+function csc_event_next_occurrence_form_node_event_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Check that the field exists.
+  if (isset($form['field_next_occurrence'])) {
+    // Make the field read-only.
+    $form['field_next_occurrence']['widget'][0]['value']['#attributes']['readonly'] = 'readonly';
+
+    // Optionally, add a description to explain it's auto-populated.
+    $form['field_next_occurrence']['widget'][0]['value']['#description'] = t('This value is automatically calculated and cannot be edited.');
+  }
+
+}
+
+/**
+ * Implements hook_entity_presave().
+ * Updates the next occurrence timestamp when an event is saved.
+ */
+function csc_event_next_occurrence_entity_presave(Drupal\Core\Entity\EntityInterface $entity) {
+  if ($entity->getEntityTypeId() === 'node' && $entity->bundle() === 'event') {
+    _csc_event_next_occurrence_update_node($entity);
+  }
+}
+
+/**
+ * Helper function to update the next occurrence field for a node.
+ */
+function _csc_event_next_occurrence_update_node(Node $node) {
+  if ($node->hasField('field_date') && $node->hasField('field_next_occurrence')) {
+    $next_occurrence = NULL;
+    $last_occurrence = NULL;
+
+    // Get Smart Date instances.
+    $instances = $node->get('field_date')->getValue();
+    $now = \Drupal::time()->getCurrentTime();
+
+    foreach ($instances as $n => $instance) {
+      if (!empty($instance['value'])) {
+        $timestamp = $instance['value'];
+        if ($timestamp >= $now && (empty($next_occurrence) || $timestamp < $next_occurrence)) {
+          $next_occurrence = $timestamp;
+        }
+        $last_occurrence = $timestamp;
+      }
+    }
+
+    if ($next_occurrence) {
+      $node->set('field_next_occurrence', $next_occurrence);
+    }
+
+    if($last_occurrence) {
+      $dateval = date('Y-m-d\TH:i:s', $last_occurrence);
+      $node->set('field_end_date', $dateval);
+    }
+  }
+}
+
+
+/**
+ * Implements hook_cron().
+ * Updates next occurrence for all future events.
+ */
+function csc_event_next_occurrence_cron() {
+  $now = \Drupal::time()->getCurrentTime();
+
+  $query = \Drupal::entityTypeManager()->getStorage('node')->getQuery();
+  $query->accessCheck(FALSE); // Add this line
+
+  $or = $query->orConditionGroup()
+    ->condition('field_end_date.value', $now, '>=')
+    ->condition('field_date.end_value', $now, '>=');
+
+  $nids = $query
+    ->condition('type', 'event')
+    ->condition($or)
+    ->condition('status', 1)
+    ->execute();
+
+  if ($nids) {
+    $nodes = Node::loadMultiple($nids);
+    foreach ($nodes as $node) {
+      // _csc_event_next_occurrence_update_node($node, TRUE);
+      $node->save(); // Node save should call the update node function anyway
+    }
+  }
+}
+
+function csc_log_me($msg='no message sent to log function', $ltype='notice', $sufx='') {
+  if (strlen($sufx) > 0) { $sufx = " $sufx"; }
+  if ($ltype == 'warning') {
+    Drupal::logger("csc_bs_sass$sufx")->warning($msg);
+  } elseif ($ltype == 'error') {
+    Drupal::logger("csc_bs_sass$sufx")->error($msg);
+  } else {
+    Drupal::logger("csc_bs_sass$sufx")->notice($msg);
+  }
+}

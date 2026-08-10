@@ -1,0 +1,4 @@
+node_form:
+  css:
+    theme:
+      css/csc-admin-node-form.css: {}

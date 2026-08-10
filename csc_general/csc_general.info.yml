@@ -1,0 +1,8 @@
+name: 'CSC General'
+type: module
+description: 'Module for generic custom updates for CSC’s Drupal site.'
+core_version_requirement: ^10 || ^11
+package: CSC
+dependencies:
+  - drupal:views
+  - drupal:smart_date

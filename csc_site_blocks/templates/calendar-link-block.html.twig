@@ -1,0 +1,36 @@
+<!-- Add to Calendar Link Template -->
+{% if node.field_end_date.value | date('U') > 'now' | date('U') %}
+  {% if node.body.summary is not empty %}
+    {% set desc = node.body.summary %}
+  {% else %}
+    {% set desc = node.body.value|striptags|slice(0, 300) ~ '...' %}
+  {% endif %}
+  {% set title = node.title.value %}
+  {% set links = calendar_links(node.title, dates[0].start, dates[0].end, dates[0].all_day, desc, node.field_location.entity.label ) %}
+
+<div class="calendar-link-block dropdown">
+    <button class="btn btn-outline dropdown-toggle" type="button" id="dropdownFormButton" data-bs-toggle="dropdown" aria-expanded="false">
+      {{ message }}
+    </button>
+    <div class="dropdown-menu" style="min-width: 300px;">
+      <ul class="list-unstyled">
+        {% for link in links %}
+          {% if link.type_key == 'google' and dates[0].rrule %}
+            {% set repstr = '&recur=' ~ dates[0].rrule ~ '&ctz=America/New_York' %}
+            <li>
+              <a href="{{ link.url|replace({'&ctz=America/New_York': repstr}) }}" class="calendar-link {{ link.type_key }} plain" target="_blank">{{ link.type_name }}</a>
+            </li>
+          {% elseif link.type_key == 'ics' %}
+            <li>
+              <a href="{{ link.url }}" class="calendar-link {{ link.type_key }} plain" download="CSC Event - {{ title }}">{{ link.type_name }}</a>
+            </li>
+          {% else %}
+            <li>
+              <a href="{{ link.url }}" class="calendar-link {{ link.type_key }} plain" target="_blank">{{ link.type_name }}</a>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endif %}

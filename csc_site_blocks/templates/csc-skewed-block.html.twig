@@ -1,0 +1,18 @@
+{# block--csc-skewed-block.html.twig #}
+{%
+  set classes = [
+  'block',
+  'block--csc-site-blocks',
+  'csc-skewed-block',
+  bgcolor ? 'bg-' ~ bgcolor|lower
+]
+%}
+{% set divhgt = divheight ?? '100' %}
+<div{{ attributes.addClass(classes) }} style="height: {{ divhgt }}px; margin-bottom: {{ marginbottom }}px;">
+  {{ title_prefix }}
+  {{ title_suffix }}
+  <div class="content">
+    <div class="skew-overlay" style="transform: skewY({{ angle }}deg);
+      height: {{ divheight }}px; top: {{ skewheight }}px;"></div>
+  </div>
+</div>

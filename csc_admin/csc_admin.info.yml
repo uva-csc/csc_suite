@@ -1,0 +1,7 @@
+name: 'CSC Admin Tools'
+type: module
+description: 'Provides administrative tools for the CSC site, including Drush commands for managing files.'
+package: CSC
+core_version_requirement: ^10 || ^11
+dependencies:
+  - drupal:file

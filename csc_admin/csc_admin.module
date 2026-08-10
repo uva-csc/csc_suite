@@ -1,0 +1,30 @@
+<?php
+/**
+ * Implements hook_update_projects_alter().
+ * disables update checking for csc_bs_sass
+ */
+function csc_admin_update_projects_alter(&$projects) {
+  unset($projects['csc_bs_sass']);
+}
+
+/**
+ * Implements hook_form_alter().
+ * Attaches a fix for the field_content_blocks paragraphs table overflowing
+ * into the node edit form's sidebar in Claro.
+ */
+function csc_admin_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  if (str_starts_with($form_id, 'node_') && str_ends_with($form_id, '_form') && isset($form['field_content_blocks'])) {
+    $form['#attached']['library'][] = 'csc_admin/node_form';
+  }
+}
+
+function csc_log_admin($msg='no message sent to log function', $ltype='notice', $sufx='') {
+  if (strlen($sufx) > 0) { $sufx = " $sufx"; }
+  if ($ltype == 'warning') {
+    Drupal::logger("csc_bs_sass$sufx")->warning($msg);
+  } elseif ($ltype == 'error') {
+    Drupal::logger("csc_bs_sass$sufx")->error($msg);
+  } else {
+    Drupal::logger("csc_bs_sass$sufx")->notice($msg);
+  }
+}

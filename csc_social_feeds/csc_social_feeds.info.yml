@@ -1,0 +1,5 @@
+name: 'CSC Social Media Feeds'
+type: module
+description: 'Creates a custom block to display CSC Social media feeds'
+core_version_requirement: ^10 || ^11
+package: CSC
