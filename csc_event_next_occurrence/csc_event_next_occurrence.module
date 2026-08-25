@@ -90,7 +90,12 @@ function _csc_event_next_occurrence_update_node(Node $node) {
         if ($timestamp >= $now && (empty($next_occurrence) || $timestamp < $next_occurrence)) {
           $next_occurrence = $timestamp;
         }
-        $last_occurrence = $timestamp;
+        // Track the latest END of any instance, not its start, so multi-day
+        // events stay in upcoming listings until they have actually finished.
+        $end = !empty($instance['end_value']) ? $instance['end_value'] : $timestamp;
+        if ($last_occurrence === NULL || $end > $last_occurrence) {
+          $last_occurrence = $end;
+        }
       }
     }
 
