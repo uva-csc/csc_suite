@@ -8,9 +8,10 @@ use Drupal\Core\Access\AccessResult;
 use Drupal\node\NodeInterface;
 
 function csc_general_preprocess_page(&$variables) {
-  // Redirect taxonomy term pages to homepage
+  // Redirect taxonomy term pages to homepage for anonymous visitors only;
+  // logged-in users can still reach the (unstyled) term page directly.
   $route_name = \Drupal::routeMatch()->getRouteName();
-  if ($route_name === 'entity.taxonomy_term.canonical') {
+  if ($route_name === 'entity.taxonomy_term.canonical' && \Drupal::currentUser()->isAnonymous()) {
     // Redirect to homepage
     $response = new \Symfony\Component\HttpFoundation\RedirectResponse('/');
     $response->send();
