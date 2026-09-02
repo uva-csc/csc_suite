@@ -84,7 +84,7 @@ class CscPageCheckCommands extends DrushCommands {
    * fail to load.
    *
    * @command csc-admin:page-check
-   * @aliases page-check
+   * @aliases page-check,csc-check
    * @option base-url Base URL to test against. Defaults to the host used to invoke this command (respects --uri).
    * @option recurring-events Number of recurring events to check. Defaults to 3.
    * @usage drush page-check
