@@ -1,5 +1,5 @@
 <!-- Add to Calendar Link Template -->
-{% if node.field_end_date.value | date('U') > 'now' | date('U') %}
+{% if node.field_end_date.value is not empty and node.field_end_date.value | date('U') > 'now' | date('U') %}
   {% if node.body.summary is not empty %}
     {% set desc = node.body.summary %}
   {% else %}
