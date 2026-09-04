@@ -8,6 +8,7 @@
 }
 
 .csc-gallery-item {
+  position: relative;
   break-inside: avoid;
   margin-bottom: 1rem;
 }
@@ -50,6 +51,27 @@
 .csc-gallery-trigger:focus-within .csc-gallery-caption {
   opacity: 1;
   transform: translateY(0);
+}
+
+.csc-gallery-edit-link {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: #181818;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.csc-gallery-item:hover .csc-gallery-edit-link,
+.csc-gallery-edit-link:focus-visible {
+  opacity: 1;
 }
 
 /* Modal */
