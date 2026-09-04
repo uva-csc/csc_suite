@@ -82,6 +82,12 @@ class CscGalleryMasonry extends StylePluginBase {
     $display_id = $this->view->current_display;
     $modal_id = Html::getUniqueId('csc-gallery-modal--' . $view_id . '--' . $display_id);
 
+    // DisplayPluginBase::render() wires the outer display element's
+    // '#attached' by reference to $view->element['#attached'] - attach
+    // through that (the mechanism Views itself uses) rather than this
+    // style plugin's own return value.
+    $this->view->element['#attached']['library'][] = 'csc_gallery/gallery';
+
     return [
       '#theme' => $this->themeFunctions(),
       '#view' => $this->view,
@@ -90,9 +96,6 @@ class CscGalleryMasonry extends StylePluginBase {
       '#tile_size' => $this->options['tile_size'],
       '#modal_height' => $this->options['modal_height'],
       '#gallery_items' => $this->buildGalleryItems(),
-      '#attached' => [
-        'library' => ['csc_gallery/gallery'],
-      ],
     ];
   }
 
