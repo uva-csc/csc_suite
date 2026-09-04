@@ -1,0 +1,5 @@
+name: 'CSC Gallery'
+type: module
+description: 'Masonry gallery Views style plugin with modal image popup for media image galleries.'
+core_version_requirement: ^10 || ^11
+package: CSC
