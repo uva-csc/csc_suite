@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Hooks for the CSC Gallery module.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function csc_gallery_theme($existing, $type, $theme, $path) {
+  return [
+    'views_view_csc_gallery_masonry' => [
+      'template' => 'views-view-csc-gallery-masonry',
+      'variables' => [
+        'view' => NULL,
+        'modal_id' => '',
+        'tile_size' => 'medium',
+        'modal_height' => 90,
+        'gallery_items' => [],
+      ],
+    ],
+  ];
+}

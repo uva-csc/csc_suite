@@ -1,0 +1,44 @@
+{#
+/**
+ * @file
+ * Masonry gallery of media images with a modal image popup.
+ *
+ * Available variables:
+ * - view: The view.
+ * - modal_id: Unique DOM id for this view instance's shared modal.
+ * - tile_size: 'small', 'medium' or 'large'.
+ * - modal_height: Modal image max height, as a percentage of viewport height.
+ * - gallery_items: List of items, each with thumb_url, full_url, alt, caption.
+ */
+#}
+{% set column_widths = { small: '180px', medium: '260px', large: '340px' } %}
+<div class="csc-gallery-masonry" style="--csc-gallery-column-width: {{ column_widths[tile_size] ?? column_widths.medium }}">
+  {% for item in gallery_items %}
+    <div class="csc-gallery-item">
+      <button type="button"
+        class="csc-gallery-trigger"
+        data-bs-toggle="modal"
+        data-bs-target="#{{ modal_id }}"
+        data-full-src="{{ item.full_url }}"
+        data-caption="{{ item.caption }}"
+        data-alt="{{ item.alt }}">
+        <img src="{{ item.thumb_url }}" alt="{{ item.alt }}" loading="lazy" />
+        {% if item.caption %}
+          <span class="csc-gallery-caption">{{ item.caption }}</span>
+        {% endif %}
+      </button>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="modal fade csc-gallery-modal" id="{{ modal_id }}" tabindex="-1" aria-hidden="true" style="--csc-gallery-modal-height: {{ modal_height }}vh">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <button type="button" class="btn-close csc-gallery-modal-close" data-bs-dismiss="modal" aria-label="{{ 'Close'|t }}"></button>
+      <div class="modal-body csc-gallery-modal-body">
+        <img src="" alt="" class="csc-gallery-modal-image" />
+        <div class="csc-gallery-modal-caption"></div>
+      </div>
+    </div>
+  </div>
+</div>

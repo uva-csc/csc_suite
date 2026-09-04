@@ -1,0 +1,11 @@
+gallery:
+  version: VERSION
+  css:
+    theme:
+      css/gallery.css: {}
+  js:
+    js/gallery-modal.js: {}
+  dependencies:
+    - core/once
+    - core/drupal
+    - csc_bs_sass/bootstrap

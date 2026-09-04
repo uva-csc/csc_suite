@@ -1,0 +1,97 @@
+/**
+ * CSC Gallery - masonry grid + modal popup.
+ */
+
+.csc-gallery-masonry {
+  column-width: var(--csc-gallery-column-width, 260px);
+  column-gap: 1rem;
+}
+
+.csc-gallery-item {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+}
+
+.csc-gallery-trigger {
+  display: block;
+  position: relative;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 0.25rem;
+}
+
+.csc-gallery-trigger img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.csc-gallery-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 0.875rem;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.csc-gallery-trigger:hover .csc-gallery-caption,
+.csc-gallery-trigger:focus-visible .csc-gallery-caption,
+.csc-gallery-trigger:focus-within .csc-gallery-caption {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Modal */
+
+.csc-gallery-modal .modal-content {
+  background: transparent;
+  border: 0;
+}
+
+.csc-gallery-modal-body {
+  position: relative;
+  padding: 0;
+  text-align: center;
+}
+
+.csc-gallery-modal-image {
+  max-width: 100%;
+  max-height: var(--csc-gallery-modal-height, 90vh);
+  object-fit: contain;
+}
+
+.csc-gallery-modal-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  text-align: left;
+}
+
+.csc-gallery-modal-caption:empty {
+  display: none;
+}
+
+.csc-gallery-modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+  background-color: #fff;
+  border-radius: 50%;
+  opacity: 1;
+}
