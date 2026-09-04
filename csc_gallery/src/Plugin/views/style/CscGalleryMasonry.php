@@ -134,6 +134,9 @@ class CscGalleryMasonry extends StylePluginBase {
       if ($entity->hasField('field_caption') && !$entity->get('field_caption')->isEmpty()) {
         $caption = $entity->get('field_caption')->value;
       }
+      if ($caption === '') {
+        $caption = $alt;
+      }
 
       $edit_access = $entity->access('update', NULL, TRUE);
       $cacheability->addCacheableDependency($edit_access);
