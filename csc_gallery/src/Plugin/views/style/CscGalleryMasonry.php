@@ -143,7 +143,7 @@ class CscGalleryMasonry extends StylePluginBase {
         $caption = $entity->get('field_caption')->value;
       }
       if ($caption === '' && $this->options['caption_fallback_alt']) {
-        $caption = $alt;
+        $caption = mb_convert_case($alt, MB_CASE_TITLE, 'UTF-8');
       }
 
       $edit_access = $entity->access('update', NULL, TRUE);
