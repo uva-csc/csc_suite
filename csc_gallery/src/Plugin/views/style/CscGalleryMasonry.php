@@ -3,6 +3,7 @@
 namespace Drupal\csc_gallery\Plugin\views\style;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\media\MediaInterface;
@@ -110,6 +111,7 @@ class CscGalleryMasonry extends StylePluginBase {
     $items = [];
     $file_url_generator = \Drupal::service('file_url_generator');
     $thumbnail_style = ImageStyle::load(static::THUMBNAIL_IMAGE_STYLE);
+    $cacheability = new CacheableMetadata();
 
     foreach ($this->view->result as $row) {
       $entity = $row->_entity ?? NULL;
@@ -133,13 +135,19 @@ class CscGalleryMasonry extends StylePluginBase {
         $caption = $entity->get('field_caption')->value;
       }
 
+      $edit_access = $entity->access('update', NULL, TRUE);
+      $cacheability->addCacheableDependency($edit_access);
+
       $items[] = [
         'thumb_url' => $thumbnail_style ? $thumbnail_style->buildUrl($uri) : $file_url_generator->generateString($uri),
         'full_url' => $file_url_generator->generateString($uri),
         'alt' => $alt,
         'caption' => $caption,
+        'edit_url' => $edit_access->isAllowed() ? $entity->toUrl('edit-form')->toString() : NULL,
       ];
     }
+
+    $cacheability->applyTo($this->view->element);
 
     return $items;
   }
