@@ -183,13 +183,21 @@ class CscGalleryMasonry extends StylePluginBase {
       'out', 'over', 'past', 'per', 'so', 'than', 'the', 'till', 'to',
       'up', 'upon', 'via', 'with', 'within', 'without', 'yet',
     ];
+    // Words that should always render fully uppercase (acronyms etc.),
+    // regardless of the normal title-casing rules.
+    static $always_uppercase_words = [
+      'uva',
+    ];
 
     $words = preg_split('/\s+/u', trim($text));
     $last_index = count($words) - 1;
 
     foreach ($words as $i => $word) {
       $core = mb_strtolower(preg_replace('/[^\p{L}\p{N}\']/u', '', $word), 'UTF-8');
-      if ($i !== 0 && $i !== $last_index && in_array($core, $lowercase_words, TRUE)) {
+      if (in_array($core, $always_uppercase_words, TRUE)) {
+        $words[$i] = mb_strtoupper($word, 'UTF-8');
+      }
+      elseif ($i !== 0 && $i !== $last_index && in_array($core, $lowercase_words, TRUE)) {
         $words[$i] = mb_strtolower($word, 'UTF-8');
       }
       else {
