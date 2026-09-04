@@ -9,5 +9,30 @@
 }
 
 .field--widget-paragraphs table {
-  table-layout: fixed;
+  width: 100%;
+}
+
+.field--widget-paragraphs td.field-multiple-drag {
+  width: 1px;
+  white-space: nowrap;
+}
+
+/* CKEditor 5's toolbar-grouping JS doesn't reliably re-measure this narrow
+ * table cell, so its button row can end up wider than the cell and force
+ * the whole table to overflow. Let the buttons wrap instead of relying on
+ * that JS measurement. */
+.field--widget-paragraphs .ck-editor,
+.field--widget-paragraphs .ck-editor__top,
+.field--widget-paragraphs .ck-sticky-panel,
+.field--widget-paragraphs .ck-sticky-panel__content,
+.field--widget-paragraphs .ck-toolbar,
+.field--widget-paragraphs .ck-toolbar__items {
+  width: 100% !important;
+  max-width: 100%;
+  min-width: 0 !important;
+  box-sizing: border-box;
+}
+
+.field--widget-paragraphs .ck-toolbar__items {
+  flex-wrap: wrap !important;
 }
