@@ -44,6 +44,7 @@ class CscGalleryMasonry extends StylePluginBase {
     $options = parent::defineOptions();
     $options['tile_size'] = ['default' => 'medium'];
     $options['modal_height'] = ['default' => 90];
+    $options['caption_fallback_alt'] = ['default' => TRUE];
     return $options;
   }
 
@@ -72,6 +73,13 @@ class CscGalleryMasonry extends StylePluginBase {
       '#max' => 100,
       '#default_value' => $this->options['modal_height'],
       '#description' => $this->t('Maximum height of the full-size image popup, as a percentage of the viewport height.'),
+    ];
+
+    $form['caption_fallback_alt'] = [
+      '#title' => $this->t('Use alt field for captions'),
+      '#type' => 'checkbox',
+      '#default_value' => $this->options['caption_fallback_alt'],
+      '#description' => $this->t('When a media item has no caption, fall back to its image alt text.'),
     ];
   }
 
@@ -134,7 +142,7 @@ class CscGalleryMasonry extends StylePluginBase {
       if ($entity->hasField('field_caption') && !$entity->get('field_caption')->isEmpty()) {
         $caption = $entity->get('field_caption')->value;
       }
-      if ($caption === '') {
+      if ($caption === '' && $this->options['caption_fallback_alt']) {
         $caption = $alt;
       }
 
