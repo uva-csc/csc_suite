@@ -143,7 +143,7 @@ class CscGalleryMasonry extends StylePluginBase {
         $caption = $entity->get('field_caption')->value;
       }
       if ($caption === '' && $this->options['caption_fallback_alt']) {
-        $caption = mb_convert_case($alt, MB_CASE_TITLE, 'UTF-8');
+        $caption = static::chicagoTitleCase($alt);
       }
 
       $edit_access = $entity->access('update', NULL, TRUE);
@@ -161,6 +161,43 @@ class CscGalleryMasonry extends StylePluginBase {
     $cacheability->applyTo($this->view->element);
 
     return $items;
+  }
+
+  /**
+   * Converts a string to Chicago Manual of Style title case.
+   *
+   * Capitalizes the first and last word, and every word except articles,
+   * coordinating conjunctions, and prepositions (which stay lowercase
+   * unless they're the first or last word).
+   *
+   * @param string $text
+   *   The text to convert.
+   *
+   * @return string
+   *   The title-cased text.
+   */
+  protected static function chicagoTitleCase($text) {
+    static $lowercase_words = [
+      'a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in',
+      'into', 'like', 'near', 'nor', 'of', 'off', 'on', 'onto', 'or',
+      'out', 'over', 'past', 'per', 'so', 'than', 'the', 'till', 'to',
+      'up', 'upon', 'via', 'with', 'within', 'without', 'yet',
+    ];
+
+    $words = preg_split('/\s+/u', trim($text));
+    $last_index = count($words) - 1;
+
+    foreach ($words as $i => $word) {
+      $core = mb_strtolower(preg_replace('/[^\p{L}\p{N}\']/u', '', $word), 'UTF-8');
+      if ($i !== 0 && $i !== $last_index && in_array($core, $lowercase_words, TRUE)) {
+        $words[$i] = mb_strtolower($word, 'UTF-8');
+      }
+      else {
+        $words[$i] = mb_convert_case($word, MB_CASE_TITLE, 'UTF-8');
+      }
+    }
+
+    return implode(' ', $words);
   }
 
 }
