@@ -28,6 +28,14 @@ class CscCanceledDatesBlock extends BlockBase {
       // Iterate through the items in the Smart date field and extract the cancelled dates
       $smart_date_field = $node->get('field_date'); // Retrieve the recurring date field.
       $canceled_dates = [];
+
+      // Only list cancellations that haven't happened yet. The boundary is the
+      // start of today, so a date canceled today still shows for the rest of
+      // the day. Instances come back as \DateTime in the site's timezone, which
+      // is also PHP's default timezone under Drupal, so this compares like with
+      // like.
+      $today = new \DateTime('today');
+
       foreach ($smart_date_field as $item) {
         $date_field_value = $item->getValue(); // Get the value for the current item.
 
@@ -44,6 +52,11 @@ class CscCanceledDatesBlock extends BlockBase {
               // $canceled_dates[] = $instance->getStart()->format('M j');
               if (!empty($instance)) {
                 $start_date = $instance->getStart(); // Get the start date as a DateTime object.
+
+                // Skip cancellations that have already passed.
+                if ($start_date < $today) {
+                  continue;
+                }
 
                 // Check if the date is already in the array.
                 $exists = FALSE;
@@ -75,6 +88,14 @@ class CscCanceledDatesBlock extends BlockBase {
             ]);
       */
 
+      // The list depends on today's date, so it can't be cached past midnight.
+      // 'url.path' keeps one node's cancellations from being reused on another,
+      // since the node comes from the route rather than a block context.
+      $cache = [
+        'contexts' => ['url.path'],
+        'max-age' => (new \DateTime('tomorrow'))->getTimestamp() - time(),
+      ];
+
       if (count($canceled_dates) > 0) {
         $canceled_dates = groupDateRanges($canceled_dates);
 
@@ -85,9 +106,13 @@ class CscCanceledDatesBlock extends BlockBase {
             '#canceled_dates' => Markup::create(
               implode(", ", array_map(fn($date) => '<span class="text-nowrap">' . $date . '</span>', $canceled_dates))
             ),
+            '#cache' => $cache,
           ];
         }
       }
+
+      // No upcoming cancellations, but that can change at midnight too.
+      return ['#cache' => $cache];
     }
     // Default message if no canceled dates are found.
     return [];
