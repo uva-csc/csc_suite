@@ -52,6 +52,18 @@
             <span class="csc-gallery-modal-close-label">{{ 'Close'|t }}</span>
           </button>
           <div class="csc-gallery-modal-caption"></div>
+          {% if gallery_items|length > 1 %}
+            <button type="button" class="csc-gallery-modal-nav csc-gallery-modal-prev" aria-label="{{ 'Previous image'|t }}" title="{{ 'Previous image'|t }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+              </svg>
+            </button>
+            <button type="button" class="csc-gallery-modal-nav csc-gallery-modal-next" aria-label="{{ 'Next image'|t }}" title="{{ 'Next image'|t }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+              </svg>
+            </button>
+          {% endif %}
         </div>
       </div>
     </div>

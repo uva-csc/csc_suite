@@ -181,3 +181,29 @@
 .csc-gallery-modal-close:focus-visible .csc-gallery-modal-close-label {
   opacity: 1;
 }
+
+.csc-gallery-modal-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: #181818;
+  cursor: pointer;
+}
+
+.csc-gallery-modal-prev {
+  left: 0.5rem;
+}
+
+.csc-gallery-modal-next {
+  right: 0.5rem;
+}
