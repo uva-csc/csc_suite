@@ -33,16 +33,12 @@ class CscGalleryMasonry extends StylePluginBase {
   protected $usesGrouping = FALSE;
 
   /**
-   * The image style used for gallery tile thumbnails.
-   */
-  const THUMBNAIL_IMAGE_STYLE = 'medium';
-
-  /**
    * {@inheritdoc}
    */
   protected function defineOptions() {
     $options = parent::defineOptions();
     $options['tile_size'] = ['default' => 'medium'];
+    $options['thumbnail_image_style'] = ['default' => 'medium'];
     $options['modal_height'] = ['default' => 90];
     $options['caption_fallback_alt'] = ['default' => TRUE];
     return $options;
@@ -53,6 +49,19 @@ class CscGalleryMasonry extends StylePluginBase {
    */
   public function buildOptionsForm(&$form, FormStateInterface $form_state) {
     parent::buildOptionsForm($form, $form_state);
+
+    $image_styles = [];
+    foreach (ImageStyle::loadMultiple() as $style) {
+      $image_styles[$style->id()] = $style->label();
+    }
+
+    $form['thumbnail_image_style'] = [
+      '#title' => $this->t('Thumbnail image style'),
+      '#type' => 'select',
+      '#options' => $image_styles,
+      '#default_value' => $this->options['thumbnail_image_style'],
+      '#description' => $this->t('Image style used for the gallery tile thumbnails. Use a style that scales rather than crops (e.g. no fixed height) to get a true masonry layout with varying tile heights.'),
+    ];
 
     $form['tile_size'] = [
       '#title' => $this->t('Tile size'),
@@ -118,7 +127,7 @@ class CscGalleryMasonry extends StylePluginBase {
   protected function buildGalleryItems() {
     $items = [];
     $file_url_generator = \Drupal::service('file_url_generator');
-    $thumbnail_style = ImageStyle::load(static::THUMBNAIL_IMAGE_STYLE);
+    $thumbnail_style = ImageStyle::load($this->options['thumbnail_image_style']);
     $cacheability = new CacheableMetadata();
 
     foreach ($this->view->result as $row) {
