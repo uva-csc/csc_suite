@@ -42,10 +42,17 @@
 <div class="modal fade csc-gallery-modal" id="{{ modal_id }}" tabindex="-1" aria-hidden="true" style="--csc-gallery-modal-height: {{ modal_height }}vh">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
-      <button type="button" class="btn-close csc-gallery-modal-close" data-bs-dismiss="modal" aria-label="{{ 'Close'|t }}"></button>
       <div class="modal-body csc-gallery-modal-body">
-        <img src="" alt="" class="csc-gallery-modal-image" />
-        <div class="csc-gallery-modal-caption"></div>
+        <div class="csc-gallery-modal-image-wrap">
+          <img src="" alt="" class="csc-gallery-modal-image" />
+          <button type="button" class="csc-gallery-modal-close" data-bs-dismiss="modal" aria-label="{{ 'Close'|t }}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+              <path d="M2.146 2.146a.5.5 0 0 1 .708 0L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854a.5.5 0 0 1 0-.708z"/>
+            </svg>
+            <span class="csc-gallery-modal-close-label">{{ 'Close'|t }}</span>
+          </button>
+          <div class="csc-gallery-modal-caption"></div>
+        </div>
       </div>
     </div>
   </div>

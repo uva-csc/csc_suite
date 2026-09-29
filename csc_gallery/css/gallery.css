@@ -76,7 +76,35 @@
 
 /* Modal */
 
+/*
+ * Bootstrap's grid rule `.row > *` (width/max-width: 100%) matches this
+ * modal whenever it renders as a direct child of a Views `.row` wrapper,
+ * which makes its 100% width resolve against the theme's capped
+ * container instead of the real viewport. Force full-viewport coverage
+ * via inset so the dialog inside it can be centered reliably.
+ */
+.csc-gallery-modal.modal {
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: none !important;
+}
+
+.csc-gallery-modal .modal-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  max-width: calc(100vw - 2rem);
+  min-height: 100%;
+  margin: 0 auto;
+}
+
 .csc-gallery-modal .modal-content {
+  width: auto;
   background: transparent;
   border: 0;
 }
@@ -87,7 +115,14 @@
   text-align: center;
 }
 
+.csc-gallery-modal-image-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
 .csc-gallery-modal-image {
+  display: block;
   max-width: 100%;
   max-height: var(--csc-gallery-modal-height, 90vh);
   object-fit: contain;
@@ -113,7 +148,36 @@
   top: 0.5rem;
   right: 0.5rem;
   z-index: 1;
-  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  color: #181818;
+  cursor: pointer;
+}
+
+.csc-gallery-modal-close-label {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 0.25rem);
+  white-space: nowrap;
+  font-size: 0.75rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.csc-gallery-modal-close:hover .csc-gallery-modal-close-label,
+.csc-gallery-modal-close:focus-visible .csc-gallery-modal-close-label {
   opacity: 1;
 }
