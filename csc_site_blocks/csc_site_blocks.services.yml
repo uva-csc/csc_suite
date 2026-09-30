@@ -1,0 +1,5 @@
+services:
+  csc_site_blocks.calendar_link_twig_extension:
+    class: Drupal\csc_site_blocks\Twig\CscCalendarLinkExtension
+    tags:
+      - { name: twig.extension }

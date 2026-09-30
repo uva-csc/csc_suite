@@ -70,10 +70,15 @@ class CscCalendarLinkBlock extends BlockBase implements ContainerFactoryPluginIn
           if ($rrule && str_contains($rrule, 'UNTIL=')) {
             [$rule_bulk, $untilval] = explode('UNTIL=', $rrule);
             if (strlen($untilval) > 1) {
-              // RRULE UNTIL values are basic iCal format: YYYYMMDDTHHMMSSZ
-              $date = DateTime::createFromFormat('Ymd\THis\Z', $untilval, new DateTimeZone('UTC'));
+              // RRULE UNTIL values must be basic iCal UTC format: YYYYMMDDTHHMMSSZ.
+              // SmartDateRule::getRule() emits the value without the trailing Z,
+              // so try that form first, then the (correct) Z-suffixed form, then
+              // a dashed/extended form as a last resort.
+              $date = DateTime::createFromFormat('Ymd\THis', $untilval, new DateTimeZone('UTC'));
               if (!$date) {
-                // Fallback in case it's ever passed in an older dashed/extended format.
+                $date = DateTime::createFromFormat('Ymd\THis\Z', $untilval, new DateTimeZone('UTC'));
+              }
+              if (!$date) {
                 $date = DateTime::createFromFormat('Y-m-d\THis', $untilval, new DateTimeZone('UTC'));
               }
               if ($date) {

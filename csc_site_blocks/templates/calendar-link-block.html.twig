@@ -22,7 +22,7 @@
             </li>
           {% elseif link.type_key == 'ics' %}
             <li>
-              <a href="{{ link.url }}" class="calendar-link {{ link.type_key }} plain" download="CSC Event - {{ title }}">{{ link.type_name }}</a>
+              <a href="{{ link.url|ics_with_rrule(dates[0].rrule) }}" class="calendar-link {{ link.type_key }} plain" download="CSC Event - {{ title }}">{{ link.type_name }}</a>
             </li>
           {% else %}
             <li>
