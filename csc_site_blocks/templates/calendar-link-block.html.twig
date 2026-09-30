@@ -6,7 +6,7 @@
     {% set desc = node.body.value|striptags|slice(0, 300) ~ '...' %}
   {% endif %}
   {% set title = node.title.value %}
-  {% set links = calendar_links(node.title, dates[0].start, dates[0].end, dates[0].all_day, desc, node.field_location.entity.label ) %}
+  {% set links = calendar_links(node.title, primary_date.start, primary_date.end, primary_date.all_day, desc, node.field_location.entity.label ) %}
 
 <div class="calendar-link-block dropdown">
     <button class="btn btn-outline dropdown-toggle" type="button" id="dropdownFormButton" data-bs-toggle="dropdown" aria-expanded="false">
@@ -19,8 +19,8 @@
             {# Outlook.com / Office365 deep links are broken for tenants migrated
                to Microsoft's new outlook.cloud.microsoft web client, which drops
                the calendar/compose target and lands on the inbox instead. #}
-          {% elseif link.type_key == 'google' and dates[0].rrule %}
-            {% set repstr = '&recur=' ~ dates[0].rrule ~ '&ctz=America/New_York' %}
+          {% elseif link.type_key == 'google' and primary_date.rrule %}
+            {% set repstr = '&recur=' ~ primary_date.rrule ~ '&ctz=America/New_York' %}
             <li>
               <a href="{{ link.url|replace({'&ctz=America/New_York': repstr}) }}" class="calendar-link {{ link.type_key }} plain" target="_blank">{{ link.type_name }}</a>
             </li>

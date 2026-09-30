@@ -21,6 +21,7 @@ function csc_site_blocks_theme() {
         'message' => '',
         'node' => null,
         'dates' => [],
+        'primary_date' => [],
       ],
       'template' => 'calendar-link-block',
     ],

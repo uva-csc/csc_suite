@@ -46,12 +46,16 @@ class CscCalendarLinkBlock extends BlockBase implements ContainerFactoryPluginIn
     if ($node instanceof NodeInterface) {
       $date_items = $node->get('field_date');
       $dates = [];
+      $all_entries = [];
       // Smart Date recur pre-materializes one field_date delta per already-
       // computed occurrence, but every occurrence in the same series shares
       // the same rrule ID. Only emit one VEVENT (with the RRULE) per series,
       // using its first occurrence as the anchor, or every recurring
       // instance would separately expand into its own infinite series.
       // Distinct, non-recurring occurrences (no rrule) each get their own.
+      // $all_entries keeps every individual occurrence (uncollapsed) so we
+      // can pick a "primary" one below for links that can't represent more
+      // than a single date (Google/Yahoo).
       $seen_rrids = [];
       foreach ($date_items as $item) {
         // $item->start_time is  \Drupal\Core\Datetime\DrupalDateTime
@@ -59,13 +63,6 @@ class CscCalendarLinkBlock extends BlockBase implements ContainerFactoryPluginIn
           continue;
         }
 
-        $rrid = $item->get('rrule')->getValue();
-        if (!empty($rrid)) {
-          if (isset($seen_rrids[$rrid])) {
-            continue;
-          }
-          $seen_rrids[$rrid] = TRUE;
-        }
         $sd_str = $item->start_time->format('Y-m-d H:i:s');
         $start_date = new DrupalDateTime($sd_str, new DateTimeZone('America/New_York'));
 
@@ -76,6 +73,7 @@ class CscCalendarLinkBlock extends BlockBase implements ContainerFactoryPluginIn
         }
 
         $duration = $item->get('duration')->getValue();
+        $rrid = $item->get('rrule')->getValue();
 
         $rrule = FALSE;
         if (!empty($rrid)) {
@@ -104,17 +102,48 @@ class CscCalendarLinkBlock extends BlockBase implements ContainerFactoryPluginIn
           }
         }
 
-        $dates[] = [
+        $entry = [
           'start' => $start_date,
           'end' => $end_date,
           'rrule' => $rrule,
           'duration' => $duration,
           'all_day' => ($duration === 1440 || $duration === 86400),
         ];
+
+        $all_entries[] = $entry;
+
+        if (!empty($rrid)) {
+          if (isset($seen_rrids[$rrid])) {
+            continue;
+          }
+          $seen_rrids[$rrid] = TRUE;
+        }
+        $dates[] = $entry;
       }
 
       if (empty($dates)) {
         return [];
+      }
+
+      // Google/Yahoo links can only ever represent a single date, so pick
+      // the next occurrence that hasn't ended yet (falling back to the most
+      // recent past one if the whole series is over) rather than always
+      // showing whatever the first field_date delta happens to be. This
+      // uses the uncollapsed list so a recurring series' correct, already-
+      // materialized future instance is used as-is (with its shared RRULE),
+      // rather than an arbitrary computed date that could desync from the
+      // real recurrence phase.
+      $now = new DrupalDateTime('now', new DateTimeZone('America/New_York'));
+      $primary_date = NULL;
+      foreach ($all_entries as $entry) {
+        $compare = $entry['end'] ?? $entry['start'];
+        if ($compare >= $now) {
+          $primary_date = $entry;
+          break;
+        }
+      }
+      if (!$primary_date) {
+        $primary_date = end($all_entries);
       }
 
       return [
@@ -122,6 +151,7 @@ class CscCalendarLinkBlock extends BlockBase implements ContainerFactoryPluginIn
         '#message' => 'Add to Calendar',
         '#node' => $node,
         '#dates' => $dates,
+        '#primary_date' => $primary_date,
         '#cache' => ['max-age' => 0],
       ];
     }
