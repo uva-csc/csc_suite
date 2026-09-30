@@ -44,11 +44,28 @@ class CscCalendarLinkBlock extends BlockBase implements ContainerFactoryPluginIn
   public function build() {
     $node = $this->routeMatch->getParameter('node');
     if ($node instanceof NodeInterface) {
-      // csc_log("Node class: " . get_class($node));
       $date_items = $node->get('field_date');
-      $item = $date_items[0];
-      // $item->start_time is  \Drupal\Core\Datetime\DrupalDateTime
-      if (isset($item->start_time)) {
+      $dates = [];
+      // Smart Date recur pre-materializes one field_date delta per already-
+      // computed occurrence, but every occurrence in the same series shares
+      // the same rrule ID. Only emit one VEVENT (with the RRULE) per series,
+      // using its first occurrence as the anchor, or every recurring
+      // instance would separately expand into its own infinite series.
+      // Distinct, non-recurring occurrences (no rrule) each get their own.
+      $seen_rrids = [];
+      foreach ($date_items as $item) {
+        // $item->start_time is  \Drupal\Core\Datetime\DrupalDateTime
+        if (!isset($item->start_time)) {
+          continue;
+        }
+
+        $rrid = $item->get('rrule')->getValue();
+        if (!empty($rrid)) {
+          if (isset($seen_rrids[$rrid])) {
+            continue;
+          }
+          $seen_rrids[$rrid] = TRUE;
+        }
         $sd_str = $item->start_time->format('Y-m-d H:i:s');
         $start_date = new DrupalDateTime($sd_str, new DateTimeZone('America/New_York'));
 
@@ -59,14 +76,11 @@ class CscCalendarLinkBlock extends BlockBase implements ContainerFactoryPluginIn
         }
 
         $duration = $item->get('duration')->getValue();
-        $rrid = $item->get('rrule')->getValue();
 
         $rrule = FALSE;
         if (!empty($rrid)) {
-          // csc_log('rrid: ' . $rrid);
           $rule = SmartDateRule::load($rrid);
           $rrule = $rule ? $rule->getRule() : FALSE;
-          // csc_log('rrule: ' . $rrule);
           if ($rrule && str_contains($rrule, 'UNTIL=')) {
             [$rule_bulk, $untilval] = explode('UNTIL=', $rrule);
             if (strlen($untilval) > 1) {
@@ -90,28 +104,26 @@ class CscCalendarLinkBlock extends BlockBase implements ContainerFactoryPluginIn
           }
         }
 
-        $date = [];
-
-        if ($start_date) {
-          $date = [
-            [
-              'start' => $start_date,
-              'end' => $end_date,
-              'rrule' => $rrule,
-              'duration' => $duration,
-              'all_day' => ($duration === 1440 || $duration === 86400),
-            ]
-          ];
-        }
-
-        return [
-          '#theme' => 'calendar_link_block',
-          '#message' => 'Add to Calendar',
-          '#node' => $node,
-          '#dates' => $date,
-          '#cache' => ['max-age' => 0],
+        $dates[] = [
+          'start' => $start_date,
+          'end' => $end_date,
+          'rrule' => $rrule,
+          'duration' => $duration,
+          'all_day' => ($duration === 1440 || $duration === 86400),
         ];
       }
+
+      if (empty($dates)) {
+        return [];
+      }
+
+      return [
+        '#theme' => 'calendar_link_block',
+        '#message' => 'Add to Calendar',
+        '#node' => $node,
+        '#dates' => $dates,
+        '#cache' => ['max-age' => 0],
+      ];
     }
     return [];
   }
