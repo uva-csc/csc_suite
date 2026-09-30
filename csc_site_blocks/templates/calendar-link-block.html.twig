@@ -15,7 +15,11 @@
     <div class="dropdown-menu" style="min-width: 300px;">
       <ul class="list-unstyled">
         {% for link in links %}
-          {% if link.type_key == 'google' and dates[0].rrule %}
+          {% if link.type_key == 'webOutlook' or link.type_key == 'webOffice' %}
+            {# Outlook.com / Office365 deep links are broken for tenants migrated
+               to Microsoft's new outlook.cloud.microsoft web client, which drops
+               the calendar/compose target and lands on the inbox instead. #}
+          {% elseif link.type_key == 'google' and dates[0].rrule %}
             {% set repstr = '&recur=' ~ dates[0].rrule ~ '&ctz=America/New_York' %}
             <li>
               <a href="{{ link.url|replace({'&ctz=America/New_York': repstr}) }}" class="calendar-link {{ link.type_key }} plain" target="_blank">{{ link.type_name }}</a>
