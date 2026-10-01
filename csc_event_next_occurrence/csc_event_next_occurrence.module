@@ -104,7 +104,10 @@ function _csc_event_next_occurrence_update_node(Node $node) {
     }
 
     if($last_occurrence) {
-      $dateval = date('Y-m-d\TH:i:s', $last_occurrence);
+      // field_end_date is a date-only field (no time component in storage);
+      // writing a full datetime string here breaks DateTimeItem's internal
+      // parsing, leaving the field unrenderable everywhere it's displayed.
+      $dateval = date('Y-m-d', $last_occurrence);
       $node->set('field_end_date', $dateval);
     }
   }
