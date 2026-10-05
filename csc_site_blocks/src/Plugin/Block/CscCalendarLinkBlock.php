@@ -106,6 +106,7 @@ class CscCalendarLinkBlock extends BlockBase implements ContainerFactoryPluginIn
           'start' => $start_date,
           'end' => $end_date,
           'rrule' => $rrule,
+          'rrule_id' => $rrid ?: NULL,
           'duration' => $duration,
           'all_day' => ($duration === 1440 || $duration === 86400),
         ];

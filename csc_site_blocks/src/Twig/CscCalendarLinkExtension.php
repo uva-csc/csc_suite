@@ -3,6 +3,7 @@
 namespace Drupal\csc_site_blocks\Twig;
 
 use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\smart_date_recur\Entity\SmartDateRule;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -38,8 +39,8 @@ class CscCalendarLinkExtension extends AbstractExtension {
    *   The event title.
    * @param array $dates
    *   Array of date info as built by CscCalendarLinkBlock::build(), each
-   *   with 'start' and 'end' (DrupalDateTime), 'rrule' (string|false) and
-   *   'all_day' (bool).
+   *   with 'start' and 'end' (DrupalDateTime), 'rrule' (string|false),
+   *   'rrule_id' (int|null, the SmartDateRule entity ID) and 'all_day' (bool).
    * @param string $description
    *   Plain-text (HTML will be stripped) event description.
    * @param string $address
@@ -102,11 +103,51 @@ class CscCalendarLinkExtension extends AbstractExtension {
     }
     if (!empty($date['rrule'])) {
       $lines[] = $date['rrule'];
+      foreach ($this->getExceptionDates($date['rrule_id'] ?? NULL, $all_day) as $exdate) {
+        $lines[] = $exdate;
+      }
     }
 
     $lines[] = 'END:VEVENT';
 
     return $lines;
+  }
+
+  /**
+   * Builds EXDATE lines for a recurring series' canceled/overridden instances.
+   *
+   * Mirrors the override-to-instance mapping in
+   * CscCanceledDatesBlock::build(): SmartDateRule::getRuleOverrides() keys
+   * are 1-indexed into makeRuleInstances() (index 0 maps to instance 0 too),
+   * so override index $ind maps to instance ($ind > 0 ? $ind - 1 : 0).
+   *
+   * @return list<string>
+   */
+  private function getExceptionDates(?int $rrule_id, bool $all_day): array {
+    if (empty($rrule_id)) {
+      return [];
+    }
+    $rule = SmartDateRule::load($rrule_id);
+    if (!$rule) {
+      return [];
+    }
+
+    $instances = $rule->makeRuleInstances();
+    $overrides = $rule->getRuleOverrides();
+
+    $exdates = [];
+    foreach ($overrides as $ind => $override) {
+      $adjind = ($ind > 0) ? $ind - 1 : 0;
+      $instance = $instances[$adjind] ?? NULL;
+      if (empty($instance)) {
+        continue;
+      }
+      $start = $instance->getStart();
+      $exdates[] = $all_day
+        ? 'EXDATE;VALUE=DATE:' . $start->format('Ymd')
+        : 'EXDATE:' . gmdate('Ymd\THis\Z', $start->getTimestamp());
+    }
+    return $exdates;
   }
 
   private function toUtc(DrupalDateTime $date): string {
