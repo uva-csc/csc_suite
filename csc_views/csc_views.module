@@ -56,6 +56,37 @@ function csc_views_views_pre_view(ViewExecutable $view, $display_id, array &$arg
 }
 
 /**
+ * Implements hook_views_query_alter().
+ *
+ * The month calendar has no date restriction of its own: calendar_view only
+ * uses calendar_timestamp to decide which month to draw, so every request
+ * fetched and rendered every event occurrence. Limit the query to occurrences
+ * overlapping the displayed month, padded by a week each side for the days of
+ * neighbouring months shown in the grid.
+ */
+function csc_views_views_query_alter(ViewExecutable $view, \Drupal\views\Plugin\views\query\QueryPluginBase $query) {
+  if ($view->id() !== 'calendar' || $view->current_display !== 'page_month') {
+    return;
+  }
+  $timestamp = \Drupal::request()->query->get('calendar_timestamp');
+  if ($timestamp && !is_numeric($timestamp)) {
+    $timestamp = strtotime($timestamp);
+  }
+  $month = new \DateTime('@' . ((int) $timestamp ?: time()));
+  $month->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+
+  $start = (clone $month)->modify('first day of this month midnight')->modify('-7 days');
+  $end = (clone $month)->modify('first day of next month midnight')->modify('+7 days');
+
+  // Occurrences overlapping [start, end): begins before the window ends and
+  // ends after it begins.
+  $query->addWhereExpression(0, 'node__field_date.field_date_value < :cal_end AND node__field_date.field_date_end_value >= :cal_start', [
+    ':cal_start' => $start->getTimestamp(),
+    ':cal_end' => $end->getTimestamp(),
+  ]);
+}
+
+/**
  * Implements hook_views_pre_render().
  */
 function csc_views_views_pre_render(ViewExecutable $view) {
