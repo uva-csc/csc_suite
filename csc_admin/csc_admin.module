@@ -16,6 +16,9 @@ function csc_admin_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form
   if (str_starts_with($form_id, 'node_') && str_ends_with($form_id, '_form') && isset($form['field_content_blocks'])) {
     $form['#attached']['library'][] = 'csc_admin/node_form';
   }
+  if ($form_id === 'views_exposed_form' && str_starts_with($form['#id'] ?? '', 'views-exposed-form-content-page-1')) {
+    $form['#attached']['library'][] = 'csc_admin/content_filters';
+  }
 }
 
 function csc_log_admin($msg='no message sent to log function', $ltype='notice', $sufx='') {

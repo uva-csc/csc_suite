@@ -1,0 +1,21 @@
+/**
+ * Admin Content view: show the exposed Content type operator and value side
+ * by side, slightly smaller, instead of stacked in Claro.
+ */
+#edit-type-wrapper .fieldset__wrapper {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#edit-type-wrapper .form-item {
+  margin: 0;
+}
+
+#edit-type-wrapper select {
+  font-size: 0.85rem;
+  min-block-size: 0;
+  padding-block: 0.25rem;
+  inline-size: auto;
+}
