@@ -2,7 +2,30 @@
  * Admin Content view: show the exposed Content type operator and value side
  * by side, slightly smaller, instead of stacked in Claro.
  */
+#edit-type-wrapper {
+  /* Match the other exposed filters: no box, same top margin. */
+  margin-block: var(--space-s) 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* Make the legend look like the other filters' labels. */
+#edit-type-wrapper .fieldset__legend {
+  margin-block: 0;
+}
+
+#edit-type-wrapper .fieldset__label {
+  padding: 0;
+  margin-block: calc(var(--space-xs) / 2);
+  font-size: var(--font-size-s);
+  line-height: var(--line-height-form-label);
+}
+
 #edit-type-wrapper .fieldset__wrapper {
+  margin: 0; /* drop Claro's inline margin so the selects line up with the label */
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
