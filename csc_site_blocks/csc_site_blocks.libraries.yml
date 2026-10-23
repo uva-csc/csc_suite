@@ -1,0 +1,7 @@
+event_search:
+  version: 1.x
+  js:
+    js/event-search.js: {}
+  dependencies:
+    - core/drupal
+    - core/once

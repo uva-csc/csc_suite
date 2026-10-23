@@ -1,0 +1,31 @@
+{#
+/**
+ * @file
+ * "Find Event" typeahead search block (csc_event_search_block).
+ *
+ * Variables: uid, label_text, placeholder, limit, include_past, endpoint.
+ * Behavior: js/event-search.js. Styles: theme csc_bs_sass (.csc-event-search).
+ */
+#}
+<div class="csc-event-search" data-csc-event-search
+     data-endpoint="{{ endpoint }}" data-limit="{{ limit }}">
+  <form class="csc-event-search__form" role="search" aria-label="{{ label_text }}">
+    <label class="csc-event-search__label" for="{{ uid }}-input">{{ label_text }}</label>
+    <div class="csc-event-search__field">
+      <svg class="csc-event-search__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+      </svg>
+      <input id="{{ uid }}-input" class="csc-event-search__input" type="text"
+             role="combobox" aria-autocomplete="list" aria-expanded="false"
+             aria-controls="{{ uid }}-list" autocomplete="off" spellcheck="false"
+             placeholder="{{ placeholder }}">
+    </div>
+    <div class="csc-event-search__past form-check">
+      <input id="{{ uid }}-past" class="csc-event-search__past-input form-check-input" type="checkbox"{% if include_past %} checked{% endif %}>
+      <label for="{{ uid }}-past" class="form-check-label">{{ 'Include past events'|t }}</label>
+    </div>
+    <ul id="{{ uid }}-list" class="csc-event-search__list" role="listbox"
+        aria-label="{{ 'Matching events'|t }}" hidden></ul>
+    <div class="visually-hidden csc-event-search__status" role="status" aria-live="polite"></div>
+  </form>
+</div>

@@ -1,0 +1,8 @@
+csc_site_blocks.event_search:
+  path: '/csc/event-search'
+  defaults:
+    _controller: '\Drupal\csc_site_blocks\Controller\EventSearchController::search'
+    _title: 'Event search'
+  methods: [GET]
+  requirements:
+    _permission: 'access content'

@@ -16,6 +16,17 @@ function csc_site_blocks_theme() {
         'marginbottom' => '',
       ],
     ],
+    'csc_event_search_block' => [
+      'variables' => [
+        'uid' => '',
+        'label_text' => '',
+        'placeholder' => '',
+        'limit' => 8,
+        'include_past' => FALSE,
+        'endpoint' => '',
+      ],
+      'template' => 'csc-event-search-block',
+    ],
     'calendar_link_block' => [
       'variables' => [
         'message' => '',
