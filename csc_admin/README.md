@@ -10,6 +10,7 @@ The command are:
 * `drush search-file example.pdf` — searches for references to “example.pdf”
 * `drush list-text-long-fields` — Lists all long text fields
 * `drush para-fields` — Lists all paragraph fields
+* `drush event-cron-check [--list] [--skipped]` — read-only: verifies the next-occurrence cron job re-saves exactly the upcoming/ongoing events (reports missed/extra), `--list` shows the events it will re-save, `--skipped` the past events no longer touched
 * `drush page-check` — smoke-tests the homepage, one node per content type, several recurring events, and every public Views page (see below)
 
 ## page-check

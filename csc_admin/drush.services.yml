@@ -21,6 +21,14 @@ services:
     tags:
       - { name: drush.command }
 
+  csc_admin_eventcroncheck.commands:
+    class: Drupal\csc_admin\Commands\CscEventCronCheckCommands
+    arguments:
+      - '@entity_type.manager'
+      - '@datetime.time'
+    tags:
+      - { name: drush.command }
+
   csc_admin_pagecheck.commands:
     class: Drupal\csc_admin\Commands\CscPageCheckCommands
     arguments:

@@ -125,7 +125,9 @@ function csc_event_next_occurrence_cron() {
   $query->accessCheck(FALSE); // Add this line
 
   $or = $query->orConditionGroup()
-    ->condition('field_end_date.value', $now, '>=')
+    // field_end_date is a date-only string; compare against a Y-m-d string.
+    // Comparing it to a raw timestamp matches every event ('2026-..' > '17..').
+    ->condition('field_end_date.value', date('Y-m-d', $now), '>=')
     ->condition('field_date.end_value', $now, '>=');
 
   $nids = $query
@@ -141,6 +143,8 @@ function csc_event_next_occurrence_cron() {
       $node->save(); // Node save should call the update node function anyway
     }
   }
+
+  \Drupal::logger('csc_event_next_occurrence')->notice('Cron re-saved @count upcoming/ongoing events.', ['@count' => count($nids)]);
 }
 
 function csc_log_me($msg='no message sent to log function', $ltype='notice', $sufx='') {
