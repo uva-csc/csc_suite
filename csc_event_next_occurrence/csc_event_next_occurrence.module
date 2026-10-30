@@ -143,6 +143,8 @@ function csc_event_next_occurrence_cron() {
       $node->save(); // Node save should call the update node function anyway
     }
   }
+
+  \Drupal::logger('csc_event_next_occurrence')->notice('Cron re-saved @count upcoming/ongoing events.', ['@count' => count($nids)]);
 }
 
 function csc_log_me($msg='no message sent to log function', $ltype='notice', $sufx='') {
