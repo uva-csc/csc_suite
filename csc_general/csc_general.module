@@ -65,3 +65,49 @@ function csc_log_gen($msg='no message sent to log function', $ltype='notice', $s
   }
 }
  */
+
+/**
+ * Implements hook_metatags_attachments_alter().
+ *
+ * Caps meta description lengths so Google and social cards don't truncate them.
+ * Runs after tokens like [node:summary] are replaced, so it trims the final text.
+ */
+function csc_general_metatags_attachments_alter(array &$metatag_attachments) {
+  $limits = [
+    'description' => 160,
+    'og:description' => 200,
+    'twitter:description' => 200,
+    'abstract' => 160,
+  ];
+  if (empty($metatag_attachments['#attached']['html_head'])) {
+    return;
+  }
+  foreach ($metatag_attachments['#attached']['html_head'] as &$item) {
+    if (!isset($item[0]['#attributes'])) {
+      continue;
+    }
+    $attrs = &$item[0]['#attributes'];
+    $key = $attrs['name'] ?? $attrs['property'] ?? NULL;
+    if ($key && isset($limits[$key]) && !empty($attrs['content'])) {
+      $attrs['content'] = csc_general_trim_description($attrs['content'], $limits[$key]);
+    }
+    unset($attrs);
+  }
+  unset($item);
+}
+
+/**
+ * Trims text to $max characters at a word boundary, adding an ellipsis.
+ */
+function csc_general_trim_description($text, $max) {
+  $text = trim(preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+  if (mb_strlen($text) <= $max) {
+    return $text;
+  }
+  $cut = mb_substr($text, 0, $max - 1);
+  $space = mb_strrpos($cut, ' ');
+  if ($space !== FALSE && $space > $max * 0.6) {
+    $cut = mb_substr($cut, 0, $space);
+  }
+  return preg_replace('/[\s,;:.\-–—]+$/u', '', $cut) . '…';
+}
